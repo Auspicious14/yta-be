@@ -8,19 +8,22 @@ class ScriptService {
   private defaultOptions = {
     max_tokens: 200,
     temperature: 0.7,
-    stream: false
+    stream: false,
   };
 
-  private async generateWithAI(systemPrompt: string, userContent: string): Promise<string> {
-    const response = await this.openRouter.completions.create({
-      ...this.defaultOptions,
+  private async generateWithAI(
+    systemPrompt: string,
+    userContent: string
+  ): Promise<string> {
+    const response = await this.openRouter.chat.completions.create({
+      // ...this.defaultOptions,
       model: this.model,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: userContent }
-      ]
+        { role: "user", content: userContent },
+      ],
     });
-    return response.choices[0].message.content;
+    return response.choices[0].message.content ?? "";
   }
 
   async generateScript(prompt: string): Promise<string> {
@@ -30,23 +33,35 @@ class ScriptService {
 
   async generateVideoTitle(script: string): Promise<string> {
     console.log("Generating video title...");
-    return this.generateWithAI("You're a professional video title creator.", script);
+    return this.generateWithAI(
+      "You're a professional video title creator.",
+      script
+    );
   }
 
   async generateVideoDescription(script: string): Promise<string> {
     console.log("Generating video description...");
-    return this.generateWithAI("You're a professional video description creator.", script);
+    return this.generateWithAI(
+      "You're a professional video description creator.",
+      script
+    );
   }
 
   async generateTags(script: string): Promise<string[]> {
     console.log("Generating video tags...");
-    const tags = await this.generateWithAI("You're a professional video tag creator.", script);
+    const tags = await this.generateWithAI(
+      "You're a professional video tag creator.",
+      script
+    );
     return tags.split(",");
   }
 
   async generateImageSearchQuery(scriptSegment: string): Promise<string> {
     console.log(`Generating image search query for segment: ${scriptSegment}`);
-    return `query for ${scriptSegment.substring(0, 20)}...`;
+    return this.generateWithAI(
+      "You're a professional image search query creator.",
+      scriptSegment
+    );
   }
 
   async generateVideoSearchQuery(scriptSegment: string): Promise<string> {
